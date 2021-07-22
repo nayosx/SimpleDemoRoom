@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Formulario</string>
+    <string name="label_note">Ingrese una nota</string>
+    <string name="hint_note">Cualquier texto aca</string>
+    <string name="btn_add">Agregar</string>
+    <string name="label_preview">Lorem Ipsum</string>
+    <string name="btnShowDatos">Mostrar notas</string>
+</resources>
