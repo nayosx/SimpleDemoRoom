@@ -66,6 +66,7 @@ public class MainActivity extends AppCompatActivity {
                     public void run() {
                         editAddNote.setText("");
                         showToast(S.NOTE_SAVE, "");
+                        finish();
                     }
                 });
             }

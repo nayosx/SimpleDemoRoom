@@ -2,7 +2,11 @@ package com.ado.formulario;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -10,22 +14,32 @@ import com.ado.formulario.database.RoomBD;
 import com.ado.formulario.model.Note;
 import com.ado.formulario.util.Cypher;
 
+import java.util.ArrayList;
 import java.util.List;
 import com.ado.formulario.util.S;
 
 public class MainActivity2 extends AppCompatActivity {
 
-    private TextView showNotes;
     private RoomBD database;
+    private ListView listView;
+
+    private String [] listNotes;
+    ArrayAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main2);
-        showNotes = (TextView) findViewById(R.id.showNotes);
+
+        listView = (ListView) findViewById(R.id.listOfNotes);
 
         database = RoomBD.getInstance(this);
         readNotesFromDataBase();
+    }
+
+    public void readNotes(View view) {
+        Intent intent = new Intent(MainActivity2.this, MainActivity.class);
+        startActivity(intent);
     }
 
     private void readNotesFromDataBase() {
@@ -36,26 +50,29 @@ public class MainActivity2 extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        notesToShowInTextView(lista);
+                        setNotes(lista);
                     }
                 });
             }
         }).start();
     }
 
-    private void notesToShowInTextView(List<Note> listaNoteas) {
-        String datos = "";
-        showNotes.setText("");
-        try {
-            for(Note note: listaNoteas) {
-                datos += "Id: "+note.getId()+"Nota: "+ Cypher.decrypt(note.getText())+" \n";
-                // datos += "Id: "+note.getId()+"Nota: "+note.getText()+" \n";
+    private void setNotes(List<Note> notes) {
+        if(notes.size() > 0) {
+            listNotes = new String[notes.size()];
+            int i = 0;
+            try {
+                for(Note note: notes) {
+                    listNotes[i] = Cypher.decrypt(note.getText());
+                    i++;
+                }
+                adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, listNotes);
+                listView.setAdapter(adapter);
+            } catch (Exception e) {
+                showToast(S.ERROR, "No se a podido leer la nota desde la base de datos");
             }
-            datos += " Este texto lo agrega luego del loop";
-            showNotes.setText(datos);
-        } catch (Exception e) {
-            showToast(S.ERROR, "No se a podido leer la nota desde la base de datos");
         }
+
     }
 
     private void showToast(int type, String message) {
@@ -72,5 +89,11 @@ public class MainActivity2 extends AppCompatActivity {
             default:
                 Toast.makeText(this, "Error desconocido", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        this.readNotesFromDataBase();
     }
 }
